@@ -1,0 +1,13 @@
+try
+     % Get slider value
+     thresh = app.ThreshSlider.Value;
+     
+     % Compute anomaly flags
+     anomalies = app.errorAll > thresh * mean(app.errorAll);
+
+     % Call visualization helper
+     app.visualizeAnomaliesInApp(anomalies, app.errorAll, app.featureTest);
+
+catch ME
+     uialert(app.UIFigure, ['Error visualizing anomalies: ' ME.message], 'Error');
+end

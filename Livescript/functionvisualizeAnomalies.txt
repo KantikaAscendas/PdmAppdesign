@@ -1,0 +1,31 @@
+function visualizeAnomaliesInApp(app, anomalies, errorAll, featureTest)
+	% Prepare anomaly index and error
+	anomalyIdx = find(anomalies);
+	anomalyErr = errorAll(anomalies);
+	
+	% Predicted and true class labels
+	predAE = categorical(anomalies, [1 0], ["Anomaly", "Healthy"]);
+	if ~iscategorical(featureTest.label)
+	    featureTest.label = categorical(featureTest.label);
+	end
+	trueAE = renamecats(featureTest.label, ["Before", "After"], ["Anomaly", "Healthy"]);
+	
+	% Calculate test accuracy
+	acc = numel(find(trueAE == predAE)) / numel(predAE) * 100;
+	
+	% === Plot to UIAxes ===
+cla(app.UIAxes);
+plot(app.UIAxes, errorAll, 'b'); hold(app.UIAxes, 'on');
+plot(app.UIAxes, anomalyIdx, anomalyErr, 'rx');
+hold(app.UIAxes, 'off');
+title(app.UIAxes, sprintf("Reconstruction Error (Thresh: %.2f)", app.ThreshSlider.Value));
+xlabel(app.UIAxes, 'Observation');
+ylabel(app.UIAxes, 'Error');
+legend(app.UIAxes, 'Error', 'Candidate Anomaly', 'Location', 'northeast');
+% Update Label with accuracy
+app.Label_2.Text = sprintf('Test Accuracy: %.2f%%', acc);
+% Show confusion chart
+figure('Name', 'Confusion Matrix');
+confusionchart(trueAE, predAE);
+title('Anomaly Detection Confusion Matrix');
+end

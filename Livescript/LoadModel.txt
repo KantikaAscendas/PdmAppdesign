@@ -1,0 +1,31 @@
+try
+  % Select dropdown
+  selectedModel = app.ModelDropDown.Value;
+  
+  [file, path] = uigetfile('*.mat', ['Select Trained Network File for ' selectedModel]);
+  if isequal(file, 0)
+	return; % User cancelled
+  end
+
+  modelPath = fullfile(path, file);
+  modelData = load(modelPath);
+
+  % Show Label
+  app.Label.Text = file;
+
+  % Check ‘net’ in file
+  if isfield(modelData, 'net’)
+      app.net = modelData.net;
+  else
+      error('Model file does not contain variable ''net''.’);
+  end
+
+  % Predict and Cal reconstruction error
+  app.yHatAll = predict(app.net, app.XTestAll);
+  app.errorAll = app.calculateError(app.XTestAll, app.yHatAll);
+  
+  % alert
+  uialert(app.UIFigure, ['Model loaded and detection complete: ' file], 'Success');
+catch ME
+  uialert(app.UIFigure, ['Error loading model or detecting: ' ME.message], 'Error');
+end

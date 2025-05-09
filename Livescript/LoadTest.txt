@@ -1,0 +1,32 @@
+try
+     [file, path] = uigetfile({'*.mat;*.xlsx', 'MAT or Excel Files (*.mat, *.xlsx)'}, ...
+		        'Select Test Data File’);
+     if isequal(file, 0)
+         return;
+     end
+     
+     fullpath = fullfile(path, file);
+     [~, ~, ext] = fileparts(file);
+
+     switch lower(ext)
+         case '.mat’
+             data = load(fullpath);
+             if isfield(data, 'featureTest’)
+                 app.featureTest = data.featureTest;
+	     else
+		error('The MAT file must contain "featureTest" or "featureAll" + "idx".’);
+	     end
+	 case '.xlsx’
+	     app.featureTest = readtable(fullpath);
+	 otherwise
+	     error('Unsupported file type.’);
+     end
+     % Extract input features (your function to process table)
+     app.XTestAll = extractLabeledData(app.featureTest, 'Label', 'All’);
+     % Show file name in EditField
+     app.EditField.Value = file;
+     % Success alert
+     uialert(app.UIFigure, ['Test data loaded: ' file], 'Success');
+catch ME
+     uialert(app.UIFigure, ['Error loading test data: ' ME.message], 'Error');
+end
